@@ -61,7 +61,7 @@ feature_transform=  # (optional) directly use this 'feature_transform',
 
 # misc.
 verbose=1 # enable per-cache reports
-skip_cuda_check=false
+skip_cuda_check=true
 
 # End configuration.
 

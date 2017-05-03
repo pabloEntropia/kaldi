@@ -56,7 +56,7 @@ copy_feats_compress=true # compress feats while resaving
 feats_std=1.0
 
 seed=777            # seed value used for data-shuffling, nn-initialization, and training,
-skip_cuda_check=false
+skip_cuda_check=true
 
 # End configuration.
 

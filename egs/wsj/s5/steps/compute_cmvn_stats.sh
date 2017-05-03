@@ -101,7 +101,7 @@ elif [ ! -z "$fake_dims" ]; then
     modify-cmvn-stats "$fake_dims" ark:- ark,scp:$cmvndir/cmvn_$name.ark,$cmvndir/cmvn_$name.scp && \
     echo "Error computing (partially fake) CMVN stats" && exit 1;
 else
-  ! compute-cmvn-stats --spk2utt=ark:$data/spk2utt scp:$data/feats.scp ark,scp:$cmvndir/cmvn_$name.ark,$cmvndir/cmvn_$name.scp \
+  ! compute-cmvn-stats --spk2utt=ark:$data/spk2utt --verbose=10 scp:$data/feats.scp ark,scp:$cmvndir/cmvn_$name.ark,$cmvndir/cmvn_$name.scp \
     2> $logdir/cmvn_$name.log && echo "Error computing CMVN stats" && exit 1;
 fi
 
