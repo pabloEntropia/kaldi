@@ -75,7 +75,8 @@ GSYMS
 /egs/*/s*/mfcc
 /egs/*/s*/plp
 /egs/*/s*/exp
-/egs/*/s*/data
+/egs/*/s*/data*
+# /egs/*/s*/local
 
 # /tools/
 /tools/ATLAS/

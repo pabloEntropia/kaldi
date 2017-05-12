@@ -1,0 +1,9 @@
+
+mfccdir=mfcc-ali
+for x in data/faligns; do
+echo $x
+steps/make_mfcc.sh --cmd "$train_cmd" --nj 16 $x exp/make_mfcc/$x $mfccdir
+utils/fix_data_dir.sh data/alignme
+steps/compute_cmvn_stats.sh $x exp/make_mfcc/$x $mfccdir
+utils/fix_data_dir.sh data/alignme
+done
