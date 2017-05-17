@@ -16,22 +16,27 @@ echo ===========================================================================
 
 
 
-# INPUT DATA: 
+# INPUT DATA:
 # name of the database to be trained (used as speaker id)
-name_db=fpop2_p001_subset1
+name_db=$1
 # folder with all WAV files from a single speaker/singer.
 input_audio_path=/home/pablo/upf/mt/datasets/$name_db
 # data folder where the GMM/DNN models are stored. Internal is data stored in this folder too.
 input_data_path=/home/pablo/upf/mt/software/kaldi-data
+# folder to save the data
+output_data_path=/home/pablo/upf/mt/results/
 
 
-#OUTPUT DATA
-# output folder where the PPG output are stored (.numpy and .png files) 
-output_bn_data_path=/home/pablo/upf/mt/results/$name_db/ppgs
+
+#OUTPUT DATA:
+# output folder where the output features are stored (.numpy and .png files)
+output_bn_data_path=$output_data_path/ppgs_no_transf/$name_db
 mkdir -p $output_bn_data_path
 
-# output_mfcc_data_path=/home/pablo/upf/mt/results/mfccs
-# mkdir -p $output_mfcc_data_path
+output_fMLLR_data_path=$output_data_path/fMLLR_no_transf/$name_db
+mkdir -p $output_fMLLR_data_path
+
+
 
 # PARAMETERS
 njobs=1 # we are running one job only
@@ -43,7 +48,7 @@ echo "         Prepare data (from WAV 16bit to SPH format as in TIMIT)          
 echo ============================================================================
 
 audio_input_format_data_voctro.sh $input_audio_path $name_db ${input_data_path} || exit 1
-echo "audio folder preprocessing done!" 
+echo "audio folder preprocessing done!"
 
 
 
@@ -60,7 +65,7 @@ data_mfcc=$input_data_path/mfcc
 
 
 # Now make MFCC features.
-src_data_dir=$input_data_path 
+src_data_dir=$input_data_path
 mfcc_log_dir=$data_mfcc/log
 
 feats_nj=$njobs
@@ -73,13 +78,13 @@ steps/make_mfcc_voctro.sh --cmd "$train_cmd" --nj $njobs $src_data_dir $mfcc_log
 mfcc_file_out=$data_mfcc/raw_mfcc_voctro.1.ark
 ../../../src/featbin/copy-feats ark:"$mfcc_file_out" ark,t:"${mfcc_file_out%.ark}.ascii";
 
-# store PGP image as PNG 
+# store PGP image as PNG
 # python plot_data_voctro.py "${mfcc_file_out%.ark}.ascii" $output_mfcc_data_path/figs
 
 
 echo "MFCC done!"
 steps/compute_cmvn_stats.sh $src_data_dir $mfcc_data_dir $mfccdir
-echo "CVMN done!" 
+echo "CVMN done!"
 
 
 
@@ -89,7 +94,7 @@ echo ===========================================================================
 echo "         Run fMLLR features computation for single file          "
 echo ============================================================================
 
-# Trained GMM model folder 
+# Trained GMM model folder
 gmmdir=$input_data_path/gmm #  Trained model: GMM directory (originally in exp/tri3)
 #gmmdir=exp/tri3 #  Trained model: GMM directory
 #transformdir=$gmmdir/decode_test
@@ -98,12 +103,14 @@ transformdir=$gmmdir/transformdir
 dir=$data_fmllr
 src_dir=$input_data_path
 
-# Here for forward path with speakers not used in the training we do not use transformation (use make_fmllr_feats_voctro.sh otherwise) 
+# Here for forward path with speakers not used in the training we do not use transformation (use make_fmllr_feats_voctro.sh otherwise)
  steps/nnet/make_fmllr_feats_voctro_notransf.sh --nj $njobs --cmd "$train_cmd" \
  --transform-dir $transformdir \
  $dir $src_dir $gmmdir $dir/log $dir/data $name_db
 
+ ../../../src/featbin/copy-feats ark:"$data_fmllr/data/feats_fmllr_${name_db}.1.ark" ark,t:"$data_fmllr/data/feats_fmllr_${name_db}.1.ascii";
 
+  python plot_data_voctro.py "$data_fmllr/data/feats_fmllr_${name_db}.1.ascii" $output_fMLLR_data_path
 
 echo ============================================================================
 echo "         Run DNN Forward path to compute output PPG features          "
@@ -122,6 +129,9 @@ file_nnet=$input_data_path/nnet/feature_extractor.nnet
 nnet-forward --use-gpu=no $file_nnet ark:$file_in ark:$file_out
 
 
+
+
+
 echo ============================================================================
 echo "         Export features files (.npy format) and save PPG images          "
 echo ============================================================================
@@ -130,9 +140,8 @@ echo ===========================================================================
 # export features as ASCII
 ../../../src/featbin/copy-feats ark:"$file_out" ark,t:"${file_out%.ark}.ascii";
 
-# store PGP image as PNG 
-python plot_data_voctro.py "${file_out%.ark}.ascii" $output_bn_data_path/ppgs
+# store PGP image as PNG
+python plot_data_voctro.py "${file_out%.ark}.ascii" $output_bn_data_path
 
-
-
-
+rm $file_out
+rm ${file_out%.ark}.ascii

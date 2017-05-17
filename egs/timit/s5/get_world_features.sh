@@ -126,6 +126,18 @@ echo "CVMN done!"
 
 
 echo ============================================================================
+echo "         Get  fMLLR Transform                                            "
+echo ============================================================================
+
+transformdir=$input_data_path/transforms
+graphdir=$input_data_path/gmm/graph
+
+steps/decode_fmllr_voctro.sh --nj $njobs --cmd "$decode_cmd" \
+/home/pablo/upf/libraries/kaldi/egs/timit/s5/exp/tri3/graph $input_data_path $transformdir
+
+
+
+echo ============================================================================
 echo "         Run fMLLR features computation for single file                   "
 echo ============================================================================
 
@@ -133,27 +145,16 @@ echo ===========================================================================
 gmmdir=$input_data_path/gmm #  Trained model: GMM directory (originally in exp/tri3)
 #gmmdir=exp/tri3 #  Trained model: GMM directory
 data_fmllr=$input_data_path/data_fmllr
-transformdir=$gmmdir/transformdir
+#transformdir=$gmmdir/transformdir
 
 fmllr_log_dir=$data_fmllr/log
 # Here for forward path with speakers not used in the training we do not use transformation (use make_fmllr_feats_voctro.sh otherwise)
 # "Usage: $0 [options] <tgt-data-dir> <src-data-dir> <gmm-dir> <log-dir> <fea-dir> <name>"
- steps/nnet/make_fmllr_feats_voctro_notransf.sh --nj $njobs --cmd "$train_cmd" \
+ steps/nnet/make_fmllr_feats_voctro.sh --nj $njobs --cmd "$train_cmd" \
  --transform-dir $transformdir \
- $data_fmllr $input_data_path $gmmdir $fmllr_log_dir $data_fmllr/data $name_db
+ $data_fmllr $input_data_path $gmmdir $fmllr_log_dir $data_fmllr/data
 
 ../../../src/featbin/copy-feats ark:"$data_fmllr/data/feats_fmllr_${name_db}.1.ark" ark,t:"$data_fmllr/data/feats_fmllr_${name_db}.1.ascii";
-
-python plot_data_voctro.py "$data_fmllr/data/feats_fmllr_${name_db}.1.ascii" $output_fMLLR_data_path
-
-#echo ============================================================================
-#echo "         Get  fMLLR Transform                                             "
-#echo ============================================================================
-
-#transformdir=$input_data_path/transforms
-#graphdir=$input_data_path/gmm/graph
-
-#steps/decode_fmllr_voctro.sh --nj $njobs --cmd "$decode_cmd" /home/pablo/upf/libraries/kaldi/egs/timit/s5/exp/tri3/graph $input_data_path $transformdir
 
 
 echo ============================================================================
@@ -188,11 +189,11 @@ echo ===========================================================================
 echo "                   Removing asci and ark data                             "
 echo ============================================================================
 
-rm $fbank_file_out
-rm ${fbank_file_out%.ark}.ascii
+# rm $fbank_file_out
+# rm ${fbank_file_out%.ark}.ascii
 
 # rm $mfcc_file_out
 # rm ${mfcc_file_out%.ark}
 
-rm $file_out
-rm ${file_out%.ark}.ascii
+# rm $file_out
+# rm ${file_out%.ark}.ascii
