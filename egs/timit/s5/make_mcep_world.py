@@ -4,16 +4,11 @@
 # The data is outut as a Kaldi style .txt
 
 import sys
-import os
 import numpy as np
+import os
 import pyworld as pw
 import soundfile as sf
-import essentia.standard as es
-
-def preemph(x, alpha):
-    y = x[1:] - alpha * x[:-1]
-    return y
-
+import pysptk as sptk
 
 data_dir = sys.argv[1]
 mfcc_dir = sys.argv[2]
@@ -50,49 +45,26 @@ for job in range(jobs):
 
         x, fs = sf.read(filename, dtype='float64')
 
-        MelBands_algo = es.MelBands(inputSize=513,
-                                    log=False,
-                                    normalize='unit_max',
-                                    numberBands=23,
-                                    sampleRate=fs,
-                                    type='power',
-                                    lowFrequencyBound=20,
-                                    highFrequencyBound=fs/2)
-
-        DCT_algo = es.DCT(inputSize=23,
-                          dctType=2,
-                          liftering=22,
-                          outputSize=13)
-        
-        #  1. int range scaling
-        x = x * 2**15 
-
-        #  2. preemph
-        x  = preemph(x, .97)
-
-        pyDioOpt = pw.pyDioOption(allowed_range=0.1,
-                                  channels_in_octave=2.0,
-                                  f0_ceil=900,
-                                  f0_floor=60,
-                                  frame_period=10.0,
-                                  speed=1.0)
+        pyDioOpt = pw.pyDioOption(
+            allowed_range=0.1,
+            channels_in_octave=2.0,
+            f0_ceil=900,
+            f0_floor=60,
+            frame_period=10.0,
+            speed=1.0)
 
         _f0, t = pw.dio(x, fs, pyDioOpt)
-
-        # todo: import f0
         f0 = pw.stonemask(x, _f0, t, fs)
-
-        # 3. world SP
         sp = pw.cheaptrick(x, f0, t, fs)
 
-        # 4. Essentia MelBands
-        MelBands = np.apply_along_axis(MelBands_algo, 1, sp.astype(np.float32))
-
-        # 5. Log
-        logMelBands = np.log(MelBands)
-
-        # 6. Essentia DCT(log())
-        mfcc = np.apply_along_axis(DCT_algo, 1, logMelBands)
+        mcep_input = 4  # 0 for dB, 3 for magnitude
+        alpha = 0.42
+        en_floor = 10 ** (-80 / 20)
+        order = 13
+        mfcc = np.apply_along_axis(sptk.mcep, 1, sp, order-1, alpha,
+                                   itype=mcep_input,
+                                   threshold=en_floor,
+                                   etype=0)
 
         file.write(kID + '  [\n')
         for i in range(len(mfcc) -1):
