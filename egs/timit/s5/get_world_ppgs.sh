@@ -35,7 +35,9 @@ output_data_path=/home/pablo/upf/mt/results/
 #OUTPUT DATA:
 # output folder where the output features are stored (.numpy and .png files)
 output_bn_data_path=$output_data_path/ppgs_world/$name_db
+output_mfcc_data_path=$output_data_path/mfcc_world/$name_db
 mkdir -p $output_bn_data_path
+mkdir -p $output_mfcc_data_path
 
 # PARAMETERS
 njobs=1 # we are running one job only
@@ -63,7 +65,7 @@ echo ===========================================================================
 
 # "Usage: $0 [options] <data-dir> [<log-dir> [<mfcc-dir>] ]";
 #steps/make_mfcc_voctro.sh --cmd "$train_cmd" --nj $njobs $input_data_path $mfcc_log_dir $data_mfcc
-python make_mfcc_world.py $input_data_path $mfcc_data_dir "voctro" $njobs
+python make_mfcc_world_librosa.py $input_data_path $mfcc_data_dir "voctro" $njobs
 # export features as ASCII
 mfcc_file_out=$mfcc_data_dir/raw_mfcc_voctro.1.txt
 ../../../src/featbin/copy-feats t,ark:"$mfcc_file_out" ark,scp:"${mfcc_file_out%.txt}.ark","${mfcc_file_out%.txt}.scp"
@@ -77,10 +79,10 @@ mfcc_file_out=$mfcc_data_dir/raw_mfcc_voctro.1.txt
 mv ${mfcc_file_out%.txt}.scp $mfcc_data_dir/feats.scp
 mv  $mfcc_data_dir/feats.scp $input_data_path
 
-#../../../src/featbin/copy-feats ark:"$mfcc_file_out" ark,t:"${mfcc_file_out%.ark}.ascii";
+../../../src/featbin/copy-feats ark:"$mfcc_file_out" ark,t:"${mfcc_file_out%.ark}.ascii";
 
 # store PGP image as PNG
-# python plot_data_voctro.py "${mfcc_file_out%.ark}" $output_mfcc_data_path
+python plot_data_voctro.py "${mfcc_file_out%.ark}" $output_mfcc_data_path
 echo "MFCC done!"
 
 # "Usage: $0 [options] <data-dir> [<log-dir> [<cmvn-dir>] ]";
