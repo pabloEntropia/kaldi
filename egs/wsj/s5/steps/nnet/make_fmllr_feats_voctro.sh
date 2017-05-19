@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # Copyright 2012-2015  Brno University of Technology (author: Karel Vesely),
-#                 
+#
 # Apache 2.0.
 #
-# This script dumps fMLLR features in a new data directory, 
+# This script dumps fMLLR features in a new data directory,
 # which is later used for neural network training/testing.
 
-# Begin configuration section.  
+# Begin configuration section.
 nj=4
 cmd=run.pl
 transform_dir=
@@ -40,11 +40,11 @@ if [ $# != 5 ]; then
 fi
 
 data=$1
-srcdata=$2 
+srcdata=$2
 gmmdir=$3
 logdir=$4
 feadir=$5
-
+name=$6 # dataset name (e.g. mpop1)
 
 
 
@@ -104,10 +104,10 @@ name="voctro" # modifiy the name of the output files
 $cmd JOB=1:$nj $logdir/make_fmllr_feats.JOB.log \
   copy-feats "$feats" \
   ark,scp:$feadir/feats_fmllr_$name.JOB.ark,$feadir/feats_fmllr_$name.JOB.scp || exit 1;
-   
+
 # Merge the scp,
 for n in $(seq 1 $nj); do
-  cat $feadir/feats_fmllr_$name.$n.scp 
+  cat $feadir/feats_fmllr_$name.$n.scp
 done > $data/feats.scp
 
 echo "$0: Done!, type $feat_type, $srcdata --> $data, using : raw-trans ${raw_transform_dir:-None}, gmm $gmmdir, trans ${transform_dir:-None}"

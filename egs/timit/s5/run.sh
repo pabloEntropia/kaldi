@@ -2,7 +2,7 @@
 
 #
 # Copyright 2013 Bagher BabaAli,
-#           2014 Brno University of Technology (Author: Karel Vesely)
+#           2014-2017 Brno University of Technology (Author: Karel Vesely)
 #
 # TIMIT, description of the database:
 # http://perso.limsi.fr/lamel/TIMIT_NISTIR4930.pdf
@@ -141,7 +141,11 @@ echo ===========================================================================
 steps/align_fmllr.sh --nj "$train_nj" --cmd "$train_cmd" \
  data/train data/lang exp/tri3 exp/tri3_ali
 
+<<<<<<< HEAD
 #exit 0 # From this point you can run Karel's DNN : local/nnet/run_dnn.sh
+=======
+exit 0 # From this point you can run Karel's DNN : local/nnet/run_dnn.sh
+>>>>>>> a7e6183c4a4e889365bdd0e9d4a0f117d1a2f16f
 
 steps/train_ubm.sh --cmd "$train_cmd" \
  $numGaussUBM data/train data/lang exp/tri3_ali exp/ubm4

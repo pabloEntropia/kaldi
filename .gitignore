@@ -72,6 +72,7 @@ GSYMS
 /src/kaldi.mk.bak
 
 # /egs/
+/egs/*/s*/mfcc_world
 /egs/*/s*/mfcc
 /egs/*/s*/plp
 /egs/*/s*/exp
