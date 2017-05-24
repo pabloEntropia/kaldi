@@ -33,13 +33,11 @@ python lab2text.py $text_path $name_db $genre
 
 #OUTPUT DATA:
 
-output_decode=$output_data_path/decode/$name_db
+output_decode=$output_data_path/Decode/$name_db
 mkdir -p $output_decode
 
 # PARAMETERS
 njobs=1 # we are running one job only
-
-
 
 graphdir=$exp_data_path/gmm/graph
 decode_dir=$exp_data_path/gmm/nnet_decode
