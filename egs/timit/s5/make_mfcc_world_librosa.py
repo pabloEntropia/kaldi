@@ -10,6 +10,7 @@ import pyworld as pw
 import soundfile as sf
 from librosa.filters import mel
 from librosa.filters import dct
+from matplotlib import pyplot as plt
 
 def preemph(x, alpha):
     y = x[1:] - alpha * x[:-1]
@@ -24,6 +25,10 @@ data_dir = sys.argv[1]
 mfcc_dir = sys.argv[2]
 set_name = sys.argv[3]
 jobs = int(sys.argv[4])
+
+do_ext_f0 = False
+if len(sys.argv) == 6:
+    do_ext_f0 = sys.argv[5].astype(bool)
 
 
 scp = open(data_dir + '/wav.scp')
@@ -73,6 +78,22 @@ for job in range(jobs):
 
         # todo: import f0
         f0 = pw.stonemask(x, _f0, t, fs)
+
+        if do_ext_f0:
+            f0file = filename.split(".WAV")[0] + '.f0'
+            print f0file 
+            a = open(f0file)
+            text = a.read().rstrip()
+            a.close()
+            ext_f0 = np.frombuffer(text, dtype=np.float32, count=-1, offset=0)
+
+            ext_f0 = ext_f0[0:len(f0)*2:2]
+            print ext_f0.shape
+            print f0.shape
+            plt.plot(ext_f0, label='external f0')
+            plt.plot(f0, label='World f0')
+            plt.legend()
+            plt.show()
 
         # 3. world SP
         sp = pw.cheaptrick(x, f0, t, fs)
