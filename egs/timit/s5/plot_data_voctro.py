@@ -18,12 +18,10 @@ fpgp.close
 figs_folder = sys.argv[2] + '/plots'
 if not os.path.exists(figs_folder):
     os.mkdir(figs_folder)
-    os.chown(figs_folder,1000 , 1000)
 
 data_folder = sys.argv[2] + '/data'
 if not os.path.exists(data_folder):
     os.mkdir(data_folder)
-    os.chown(data_folder, 1000, 1000)
 
 # convert ASCII data to numpy format matrix for one file. (skip first row)
 pgp_files = [];
@@ -51,9 +49,9 @@ for l in ll:
         fname = os.path.join(data_folder, pgp_files[-1]["fname"]+'.npy')
         np.save(fname,frames)
         # save plot
-        plt.matshow(frames.T)
-        plt.title('PGP per frame / ' + pgp_files[-1]["fname"])
-        fname = os.path.join(figs_folder, pgp_files[-1]["fname"]+'.png')
-        plt.colorbar()
-        plt.savefig(fname)
-        plt.close()
+ #       plt.matshow(frames.T)
+ #       plt.title('PGP per frame / ' + pgp_files[-1]["fname"])
+ #       fname = os.path.join(figs_folder, pgp_files[-1]["fname"]+'.png')
+ #       plt.colorbar()
+ #       plt.savefig(fname)
+ #       plt.close()

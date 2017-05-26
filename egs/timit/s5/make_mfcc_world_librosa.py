@@ -16,9 +16,12 @@ def preemph(x, alpha):
     return y
 
 def lifter(x, L=22):
-    n = np.arange(len(x)-1) +1   
-    x[1:] *=  1 + (L / 2.0) * np.sin(np.pi * n  / float(L))   
+    n = np.arange(len(x)-1) +1
+    x[1:] *=  1 + (L / 2.0) * np.sin(np.pi * n  / float(L))
     return x
+
+eps = np.finfo(float).eps
+
 
 data_dir = sys.argv[1]
 mfcc_dir = sys.argv[2]
@@ -55,21 +58,21 @@ for job in range(jobs):
 
         x, fs = sf.read(filename, dtype='float64')
 
-        
+
         #  1. int range scaling
         x = x * 2**15 
 
         #  2. preemph
         x  = preemph(x, .97)
 
-        pyDioOpt = pw.pyDioOption(allowed_range=0.1,
-                                  channels_in_octave=2.0,
-                                  f0_ceil=900,
-                                  f0_floor=60,
-                                  frame_period=10.0,
-                                  speed=1.0)
+        #pyDioOpt = pw.pyDioOption(allowed_range=0.1,
+        #                          channels_in_octave=2.0,
+        #                          f0_ceil=900,
+        #                          f0_floor=60,
+        #                          frame_period=10.0,
+        #                          speed=1.0)
 
-        _f0, t = pw.dio(x, fs, pyDioOpt)
+        _f0, t = pw.dio(x, fs, 60.0, 800.0, 2.0, 10.0)
 
         # todo: import f0
         f0 = pw.stonemask(x, _f0, t, fs)
@@ -79,7 +82,7 @@ for job in range(jobs):
 
         # 4. Essentia MelBands
         mel_basis = mel(fs, 1024, 23, 0, fs/2, True, None) 
-        MelBands = np.dot(mel_basis, sp.T **2).T 
+        MelBands = np.dot(mel_basis, sp.T).T 
         #  MelBands = np.apply_along_axis(MelBands_algo, 1, sp.astype(np.float32))
 
         # 5. Log
@@ -89,7 +92,7 @@ for job in range(jobs):
         # 6. Essentia DCT(log())
         dct_basis = dct(13,23)
         DCT = np.dot(dct_basis, logMelBands.T).T 
-        mfcc = np.apply_along_axis(lifter, 1, DCT)
+        mfcc = np.apply_along_axis(lifter, 1, DCT) + eps #Kaldi finds a division by 0
 
         file.write(kID + '  [\n')
         for i in range(len(mfcc) -1):
