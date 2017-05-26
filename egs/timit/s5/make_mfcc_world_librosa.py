@@ -10,6 +10,7 @@ import pyworld as pw
 import soundfile as sf
 from librosa.filters import mel
 from librosa.filters import dct
+from matplotlib import pyplot as plt
 
 def preemph(x, alpha):
     y = x[1:] - alpha * x[:-1]
@@ -27,6 +28,10 @@ data_dir = sys.argv[1]
 mfcc_dir = sys.argv[2]
 set_name = sys.argv[3]
 jobs = int(sys.argv[4])
+
+do_ext_f0 = False
+if len(sys.argv) == 6:
+    do_ext_f0 = float(sys.argv[5])
 
 
 scp = open(data_dir + '/wav.scp')
@@ -60,7 +65,7 @@ for job in range(jobs):
 
 
         #  1. int range scaling
-        x = x * 2**15 
+        x = x * 2**15
 
         #  2. preemph
         x  = preemph(x, .97)
@@ -77,22 +82,39 @@ for job in range(jobs):
         # todo: import f0
         f0 = pw.stonemask(x, _f0, t, fs)
 
+        if do_ext_f0:
+            f0file = filename.split(".WAV")[0] + '.f0'
+            print f0file
+            a = open(f0file)
+            text = a.read().rstrip()
+            a.close()
+            ext_f0 = np.frombuffer(text, dtype=np.float32, count=-1, offset=0)
+
+            ext_f0 = ext_f0[0:len(f0)*2:2]
+#            print ext_f0.shape
+#            print f0.shape
+#            plt.plot(ext_f0, label='external f0')
+#            plt.plot(f0, label='World f0')
+#            plt.legend()
+#            plt.show()
+
         # 3. world SP
         sp = pw.cheaptrick(x, f0, t, fs)
 
         # 4. Essentia MelBands
         mel_basis = mel(fs, 1024, 23, 0, fs/2, True, None) 
-        MelBands = np.dot(mel_basis, sp.T).T 
+        MelBands = np.dot(mel_basis, sp.T).T
+ 
         #  MelBands = np.apply_along_axis(MelBands_algo, 1, sp.astype(np.float32))
 
         # 5. Log
         logMelBands = np.log(MelBands)
 
-
         # 6. Essentia DCT(log())
         dct_basis = dct(13,23)
-        DCT = np.dot(dct_basis, logMelBands.T).T 
-        mfcc = np.apply_along_axis(lifter, 1, DCT) + eps #Kaldi finds a division by 0
+
+        DCT = np.dot(dct_basis, logMelBands.T).T
+        mfcc = np.apply_along_axis(lifter, 1, DCT)
 
         file.write(kID + '  [\n')
         for i in range(len(mfcc) -1):
