@@ -17,8 +17,8 @@ def preemph(x, alpha):
     return y
 
 def lifter(x, L=22):
-    n = np.arange(len(x)-1) +1   
-    x[1:] *=  1 + (L / 2.0) * np.sin(np.pi * n  / float(L))   
+    n = np.arange(len(x)-1) +1
+    x[1:] *=  1 + (L / 2.0) * np.sin(np.pi * n  / float(L))
     return x
 
 data_dir = sys.argv[1]
@@ -28,7 +28,7 @@ jobs = int(sys.argv[4])
 
 do_ext_f0 = False
 if len(sys.argv) == 6:
-    do_ext_f0 = sys.argv[5].astype(bool)
+    do_ext_f0 = float(sys.argv[5])
 
 
 scp = open(data_dir + '/wav.scp')
@@ -60,9 +60,9 @@ for job in range(jobs):
 
         x, fs = sf.read(filename, dtype='float64')
 
-        
+
         #  1. int range scaling
-        x = x * 2**15 
+        x = x * 2**15
 
         #  2. preemph
         x  = preemph(x, .97)
@@ -81,26 +81,26 @@ for job in range(jobs):
 
         if do_ext_f0:
             f0file = filename.split(".WAV")[0] + '.f0'
-            print f0file 
+            print f0file
             a = open(f0file)
             text = a.read().rstrip()
             a.close()
             ext_f0 = np.frombuffer(text, dtype=np.float32, count=-1, offset=0)
 
             ext_f0 = ext_f0[0:len(f0)*2:2]
-            print ext_f0.shape
-            print f0.shape
-            plt.plot(ext_f0, label='external f0')
-            plt.plot(f0, label='World f0')
-            plt.legend()
-            plt.show()
+#            print ext_f0.shape
+#            print f0.shape
+#            plt.plot(ext_f0, label='external f0')
+#            plt.plot(f0, label='World f0')
+#            plt.legend()
+#            plt.show()
 
         # 3. world SP
         sp = pw.cheaptrick(x, f0, t, fs)
 
         # 4. Essentia MelBands
-        mel_basis = mel(fs, 1024, 23, 0, fs/2, True, None) 
-        MelBands = np.dot(mel_basis, sp.T **2).T 
+        mel_basis = mel(fs, 1024, 23, 0, fs/2, True, None)
+        MelBands = np.dot(mel_basis, sp.T **2).T
         #  MelBands = np.apply_along_axis(MelBands_algo, 1, sp.astype(np.float32))
 
         # 5. Log
@@ -109,7 +109,7 @@ for job in range(jobs):
 
         # 6. Essentia DCT(log())
         dct_basis = dct(13,23)
-        DCT = np.dot(dct_basis, logMelBands.T).T 
+        DCT = np.dot(dct_basis, logMelBands.T).T
         mfcc = np.apply_along_axis(lifter, 1, DCT)
 
         file.write(kID + '  [\n')

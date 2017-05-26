@@ -17,7 +17,10 @@ echo ===========================================================================
 
 # INPUT DATA:
 # name of the database to be trained (used as speaker id)
-name_db=$1
+if [ $# != 3 ]; then
+
+system=$1
+name_db=$2
 
 # folder with all WAV files from a single speaker/singer.
 input_audio_path=/home/pablo/upf/mt/datasets/$name_db
@@ -29,15 +32,15 @@ mfcc_data_dir=/home/pablo/upf/mt/software/mfcc_data_world
 fmllr_data_dir=/home/pablo/upf/mt/software/fmllr_data
 
 # folder to save the data
-output_data_path=/home/pablo/upf/mt/results/
+output_data_path=/home/pablo/upf/mt/results/$system
 
 
 #OUTPUT DATA:
 # output folder where the output features are stored (.numpy and .png files)
-output_bn_data_path=$output_data_path/ppgs_world/$name_db
-output_mfcc_data_path=$output_data_path/mfcc_world/$name_db
+output_bn_data_path=$output_data_path/ppgs/$name_db
+# output_mfcc_data_path=$output_data_path/mfcc_world/$name_db
 mkdir -p $output_bn_data_path
-mkdir -p $output_mfcc_data_path
+# mkdir -p $output_mfcc_data_path
 
 # PARAMETERS
 njobs=1 # we are running one job only
@@ -64,25 +67,26 @@ echo ===========================================================================
 # Now make MFCC features.
 
 # "Usage: $0 [options] <data-dir> [<log-dir> [<mfcc-dir>] ]";
-#steps/make_mfcc_voctro.sh --cmd "$train_cmd" --nj $njobs $input_data_path $mfcc_log_dir $data_mfcc
-python make_mfcc_world_librosa.py $input_data_path $mfcc_data_dir "voctro" $njobs
-# export features as ASCII
+# steps/make_mfcc_voctro.sh --cmd "$train_cmd" --nj $njobs $input_data_path $mfcc_log_dir $data_mfcc
+python make_mfcc_world_librosa.py $input_data_path $mfcc_data_dir "voctro" $njobs 0
+# # export features as ASCII
 mfcc_file_out=$mfcc_data_dir/raw_mfcc_voctro.1.txt
 ../../../src/featbin/copy-feats t,ark:"$mfcc_file_out" ark,scp:"${mfcc_file_out%.txt}.ark","${mfcc_file_out%.txt}.scp"
 
- if [ -f $input_data_path/feats.scp ]; then
+if [ -f $input_data_path/feats.scp ]; then
    mkdir -p $input_data_path/.backup
    echo "$0: moving $input_data_path/feats.scp to $input_data_path/.backup"
    mv $input_data_path/feats.scp $input_data_path/.backup
- fi
+fi
 
 mv ${mfcc_file_out%.txt}.scp $mfcc_data_dir/feats.scp
 mv  $mfcc_data_dir/feats.scp $input_data_path
 
-../../../src/featbin/copy-feats ark:"$mfcc_file_out" ark,t:"${mfcc_file_out%.ark}.ascii";
+
 
 # store PGP image as PNG
-python plot_data_voctro.py "${mfcc_file_out%.ark}" $output_mfcc_data_path
+#../../../src/featbin/copy-feats ark:"$mfcc_file_out" ark,t:"${mfcc_file_out%.ark}.ascii";
+#python plot_data_voctro.py "${mfcc_file_out%.ark}" $output_mfcc_data_path
 echo "MFCC done!"
 
 # "Usage: $0 [options] <data-dir> [<log-dir> [<cmvn-dir>] ]";
@@ -99,7 +103,7 @@ echo "         Get  fMLLR Transform Matrix                                      
 echo ============================================================================
 
 # Trained GMM model folder
-gmm_dir=$exp_data_path/gmm #  Trained model: GMM directory (originally in exp/tri3)
+gmm_dir=$exp_data_path/gmm/$system #  Trained model: GMM directory (originally in exp/tri3)
 decode_dir=$gmm_dir/decode
 graph_dir=$gmm_dir/graph
 
@@ -137,7 +141,7 @@ file_in=$data_fmllr/feats_fmllr_voctro.1.ark
 file_out=$output_bn_data_path/raw_bnfea_voctro.1.ark
 
 # set nnet filename
-file_nnet=$exp_data_path/nnet/feature_extractor.nnet
+file_nnet=$exp_data_path/nnet/$system/feature_extractor.nnet
 
 # run the forward net
 nnet-forward --use-gpu=no $file_nnet ark:$file_in ark:$file_out
@@ -166,3 +170,6 @@ echo ===========================================================================
 
 rm $file_out
 rm ${file_out%.ark}.ascii
+
+fi
+exit 0;
