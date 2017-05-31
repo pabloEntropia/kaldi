@@ -68,7 +68,7 @@ echo ===========================================================================
 
 # "Usage: $0 [options] <data-dir> [<log-dir> [<mfcc-dir>] ]";
 # steps/make_mfcc_voctro.sh --cmd "$train_cmd" --nj $njobs $input_data_path $mfcc_log_dir $data_mfcc
-python make_mfcc_world_librosa.py $input_data_path $mfcc_data_dir "voctro" $njobs 0
+python make_mfcc_world_librosa.py $input_data_path $mfcc_data_dir "voctro" $njobs 1
 # # export features as ASCII
 mfcc_file_out=$mfcc_data_dir/raw_mfcc_voctro.1.txt
 ../../../src/featbin/copy-feats t,ark:"$mfcc_file_out" ark,scp:"${mfcc_file_out%.txt}.ark","${mfcc_file_out%.txt}.scp"

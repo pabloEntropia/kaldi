@@ -31,6 +31,9 @@ feats_nj=10
 train_nj=30
 decode_nj=5
 
+ doOnlyKarelDNN=true
+ if ! $doOnlyKarelDNN
+ then
 
 
 
@@ -160,9 +163,7 @@ echo ===========================================================================
 steps/align_fmllr.sh --nj "$train_nj" --cmd "$train_cmd" \
  data/train data/lang exp/tri3 exp/tri3_ali
 
- doOnlyKarelDNN=true
- if ! $doOnlyKarelDNN
- then
+
 #exit 0 # From this point you can run Karel's DNN : local/nnet/run_dnn.sh
 
 steps/train_ubm.sh --cmd "$train_cmd" \

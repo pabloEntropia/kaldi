@@ -91,8 +91,8 @@ for job in range(jobs):
             ext_f0 = np.frombuffer(text, dtype=np.float32, count=-1, offset=0)
 
             ext_f0 = ext_f0[0:len(f0)*2:2]
-#            print ext_f0.shape
-#            print f0.shape
+            print ext_f0.shape
+            print f0.shape
 #            plt.plot(ext_f0, label='external f0')
 #            plt.plot(f0, label='World f0')
 #            plt.legend()

@@ -15,7 +15,7 @@
 #    the objective is to emphasize state-sequences with better 
 #    frame accuracy w.r.t. reference alignment.
 
-. ./cmd.sh ## You'll want to change cmd.sh to something that will work on your system.
+. ./cmd_local.sh ## You'll want to change cmd.sh to something that will work on your system.
            ## This relates to the queue.
 
 . ./path.sh ## Source the tools/utils (import the queue.pl)
@@ -23,7 +23,7 @@
 # Config:
 gmmdir=exp/tri3
 data_fmllr=data-fmllr-tri3
-stage=0 # resume training with --stage=N
+stage=2 # resume training with --stage=N
 # End of config.
 . utils/parse_options.sh || exit 1;
 #
