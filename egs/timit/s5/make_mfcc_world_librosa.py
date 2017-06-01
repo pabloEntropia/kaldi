@@ -12,6 +12,13 @@ from librosa.filters import mel
 from librosa.filters import dct
 from matplotlib import pyplot as plt
 
+
+def dither (x, d):
+    samples = np.random.randn(len(x))
+    samples = samples/ np.std(samples)
+    x = x + d *samples
+    return x
+
 def preemph(x, alpha):
     y = x[1:] - alpha * x[:-1]
     return y
@@ -61,27 +68,18 @@ for job in range(jobs):
         kID = parse[0]
         filename = parse[4]
 
-        x, fs = sf.read(filename, dtype='float64')
+        x, fs = sf.read(filename, dtype='int32')
 
-
-        #  1. int range scaling
-        x = x * 2**15
+        x = dither(x, 1.0)
 
         #  2. preemph
         x  = preemph(x, .97)
 
-        #pyDioOpt = pw.pyDioOption(allowed_range=0.1,
-        #                          channels_in_octave=2.0,
-        #                          f0_ceil=900,
-        #                          f0_floor=60,
-        #                          frame_period=10.0,
-        #                          speed=1.0)
+        f0, t = pw.dio(x, fs, 60.0, 800.0, 2.0, 10.0)
+        #f0 = pw.stonemask(x, _f0, t, fs)
 
-        _f0, t = pw.dio(x, fs, 60.0, 800.0, 2.0, 10.0)
 
         # todo: import f0
-        f0 = pw.stonemask(x, _f0, t, fs)
-
         if do_ext_f0:
             f0file = filename.split(".WAV")[0] + '.f0'
             print f0file
@@ -90,20 +88,22 @@ for job in range(jobs):
             a.close()
             ext_f0 = np.frombuffer(text, dtype=np.float32, count=-1, offset=0)
 
-            ext_f0 = ext_f0[0:len(f0)*2:2]
-            print ext_f0.shape
-            print f0.shape
+            ext_f0 = np.array(ext_f0[0:len(f0)*2:2], dtype=float)
+#            print ext_f0.shape
+#            print f0.shape
 #            plt.plot(ext_f0, label='external f0')
 #            plt.plot(f0, label='World f0')
 #            plt.legend()
 #            plt.show()
 
         # 3. world SP
-        sp = pw.cheaptrick(x, f0, t, fs)
+        sp = pw.cheaptrick(x, ext_f0, t, fs) **.5
 
-        # 4. Essentia MelBands
-        mel_basis = mel(fs, 1024, 23, 0, fs/2, True, None) 
-        MelBands = np.dot(mel_basis, sp.T).T
+        sp  /=  2**15
+
+        # 4. Librosa MelBands
+        mel_basis = mel(fs, 1024, 23, 20, fs/2, True, None) 
+        MelBands = np.dot(mel_basis, sp.T).T**2
  
         #  MelBands = np.apply_along_axis(MelBands_algo, 1, sp.astype(np.float32))
 
