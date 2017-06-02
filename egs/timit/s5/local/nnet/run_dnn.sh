@@ -23,7 +23,7 @@
 # Config:
 gmmdir=exp/tri3
 data_fmllr=data-fmllr-tri3
-stage=2 # resume training with --stage=N
+stage=0 # resume training with --stage=N
 # End of config.
 . utils/parse_options.sh || exit 1;
 #

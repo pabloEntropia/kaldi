@@ -66,7 +66,7 @@ mfccdir=mfcc_world
 
  for x in train dev test; do
   #steps/make_mfcc.sh --cmd "$train_cmd" --nj $feats_nj data/$x exp/make_mfcc/$x $mfccdir
-  python make_mfcc_world.py data/$x $mfccdir $x $feats_nj
+  python make_mfcc_world_librosa.py data/$x $mfccdir $x $feats_nj 1
 
   for i in $mfccdir/raw_mfcc_$x.*.txt; do
     ../../../src/featbin/copy-feats t,ark:$i ark,scp:"${i%.txt}.ark","${i%.txt}.scp"
@@ -164,6 +164,10 @@ steps/align_fmllr.sh --nj "$train_nj" --cmd "$train_cmd" \
  data/train data/lang exp/tri3 exp/tri3_ali
 
 
+ doOnlyKarelDNN=false
+ if ! $doOnlyKarelDNN
+ then
+
 #exit 0 # From this point you can run Karel's DNN : local/nnet/run_dnn.sh
 
 steps/train_ubm.sh --cmd "$train_cmd" \
@@ -250,6 +254,7 @@ done
 else
 	echo "Skipping GSMM steps nad running only Karel's DNN. (Voctro)"
 fi # end of if for only using DNN Karel's recipe (Voctro)
+fi
 
 echo ============================================================================
 echo "               DNN Hybrid Training & Decoding (Karel's recipe)            "

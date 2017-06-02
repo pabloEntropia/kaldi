@@ -6,7 +6,9 @@
 #Hi, if you want to obtain posteriors from NN trained by nnet1 tools, the easiest is to use 'egs/wsj/s5/steps/nnet/make_bn_feats.sh', with option '--remove-last-components 0'.  The output is in feature matrix binary format. Eventually the binary output can be converted to ASCII by: 'copy-feats scp:file.scp ark,t:ascii.ark'
 
 
-timit=/mnt/hd20GB/Ubuntu16_shared/TIMIT # @JJ VOCTRO Linux
+#timit=/mnt/hd20GB/Ubuntu16_shared/TIMIT # @JJ VOCTRO Linux
+timit=/home/pablo/upf/mt/datasets/TIMIT/TIMIT # pablo directory0
+
 
 # set path for data directories
 tgt_data_dir=exp/bn_features
@@ -28,5 +30,5 @@ do
 # convert features to ascii format
 ../../../src/featbin/copy-feats scp:"$f" ark,t:"${file%.scp}.ascii";
 # store PGP image as PNG
-python plot_data_voctro.py "${file%.scp}.ascii" $abs_path_to_bn_feat_dir/figs
+#python plot_data_voctro.py "${file%.scp}.ascii" $abs_path_to_bn_feat_dir/figs
 done;
