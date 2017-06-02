@@ -80,24 +80,27 @@ for job in range(jobs):
 
 
         # todo: import f0
-        if do_ext_f0:
-            f0file = filename.split(".WAV")[0] + '.f0'
-            print f0file
+        f0file = filename.split(".WAV")[0] + '.f0'
+        if os.path.exists(f0file):
+            print "Importing f0 from %s" %f0file
             a = open(f0file)
             text = a.read().rstrip()
             a.close()
             ext_f0 = np.frombuffer(text, dtype=np.float32, count=-1, offset=0)
 
             ext_f0 = np.array(ext_f0[0:len(f0)*2:2], dtype=float)
+            f0 = ext_f0
 #            print ext_f0.shape
 #            print f0.shape
 #            plt.plot(ext_f0, label='external f0')
 #            plt.plot(f0, label='World f0')
 #            plt.legend()
 #            plt.show()
+        else:
+            print "Not .f0 file found. Using World DIO."
 
         # 3. world SP
-        sp = pw.cheaptrick(x, ext_f0, t, fs) **.5
+        sp = pw.cheaptrick(x, f0, t, fs) **.5
 
         sp  /=  2**15
 
