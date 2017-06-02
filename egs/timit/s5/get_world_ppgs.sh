@@ -144,7 +144,7 @@ file_out=$output_bn_data_path/raw_bnfea_voctro.1.ark
 file_nnet=$exp_data_path/nnet/$system/feature_extractor.nnet
 
 # run the forward net
-nnet-forward --use-gpu=no $file_nnet ark:$file_in ark:$file_out
+nnet-forward --use-gpu=yes $file_nnet ark:$file_in ark:$file_out
 
 
 echo ============================================================================
