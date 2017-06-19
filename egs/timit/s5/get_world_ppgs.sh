@@ -108,7 +108,7 @@ decode_dir=$gmm_dir/decode
 graph_dir=$gmm_dir/graph
 
 steps/decode_fmllr_voctro.sh --nj $njobs --skip-scoring true --cmd "$decode_cmd" \
-$graph_dir $input_data_path $decode_dir
+$graph_dir $input_data_path $decode_dir || exit 1;
 
 
 
@@ -122,7 +122,7 @@ data_fmllr=$exp_data_path/fmllr
 # "Usage: $0 [options] <tgt-data-dir> <src-data-dir> <gmm-dir> <log-dir> <fea-dir> <name>"
 steps/nnet/make_fmllr_feats_pablo.sh --nj $njobs --cmd "$train_cmd" \
 --transform-dir $decode_dir \
-$fmllr_data_dir $input_data_path $gmm_dir $data_fmllr/log $data_fmllr voctro
+$fmllr_data_dir $input_data_path $gmm_dir $data_fmllr/log $data_fmllr voctro || exit 1;
 
 #../../../src/featbin/copy-feats ark:"$data_fmllr/feats_fmllr_${name_db}.1.ark" ark,t:"$data_fmllr/feats_fmllr_${name_db}.1.ascii";
 
@@ -170,6 +170,8 @@ echo ===========================================================================
 
 rm $file_out
 rm ${file_out%.ark}.ascii
+rm $data_fmllr/feats_fmllr_voctro.1.ark
+rm $data_fmllr/feats_fmllr_voctro.1.scp
 
 fi
 exit 0;
