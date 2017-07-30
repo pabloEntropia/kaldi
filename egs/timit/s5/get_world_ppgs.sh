@@ -68,7 +68,7 @@ echo ===========================================================================
 
 # "Usage: $0 [options] <data-dir> [<log-dir> [<mfcc-dir>] ]";
 # steps/make_mfcc_voctro.sh --cmd "$train_cmd" --nj $njobs $input_data_path $mfcc_log_dir $data_mfcc
-python make_mfcc_world_librosa.py $input_data_path $mfcc_data_dir "voctro" $njobs 0
+python make_mfcc_world_librosa.py $input_data_path $mfcc_data_dir "voctro" $njobs 1
 # # export features as ASCII
 mfcc_file_out=$mfcc_data_dir/raw_mfcc_voctro.1.txt
 ../../../src/featbin/copy-feats t,ark:"$mfcc_file_out" ark,scp:"${mfcc_file_out%.txt}.ark","${mfcc_file_out%.txt}.scp"
@@ -108,7 +108,7 @@ decode_dir=$gmm_dir/decode
 graph_dir=$gmm_dir/graph
 
 steps/decode_fmllr_voctro.sh --nj $njobs --skip-scoring true --cmd "$decode_cmd" \
-$graph_dir $input_data_path $decode_dir
+$graph_dir $input_data_path $decode_dir || exit 1;
 
 
 
@@ -122,7 +122,7 @@ data_fmllr=$exp_data_path/fmllr
 # "Usage: $0 [options] <tgt-data-dir> <src-data-dir> <gmm-dir> <log-dir> <fea-dir> <name>"
 steps/nnet/make_fmllr_feats_pablo.sh --nj $njobs --cmd "$train_cmd" \
 --transform-dir $decode_dir \
-$fmllr_data_dir $input_data_path $gmm_dir $data_fmllr/log $data_fmllr voctro
+$fmllr_data_dir $input_data_path $gmm_dir $data_fmllr/log $data_fmllr voctro || exit 1;
 
 #../../../src/featbin/copy-feats ark:"$data_fmllr/feats_fmllr_${name_db}.1.ark" ark,t:"$data_fmllr/feats_fmllr_${name_db}.1.ascii";
 
@@ -144,7 +144,7 @@ file_out=$output_bn_data_path/raw_bnfea_voctro.1.ark
 file_nnet=$exp_data_path/nnet/$system/feature_extractor.nnet
 
 # run the forward net
-nnet-forward --use-gpu=no $file_nnet ark:$file_in ark:$file_out
+nnet-forward --use-gpu=yes $file_nnet ark:$file_in ark:$file_out
 
 
 echo ============================================================================
@@ -170,6 +170,8 @@ echo ===========================================================================
 
 rm $file_out
 rm ${file_out%.ark}.ascii
+rm $data_fmllr/feats_fmllr_voctro.1.ark
+rm $data_fmllr/feats_fmllr_voctro.1.scp
 
 fi
 exit 0;

@@ -82,7 +82,7 @@ sph_folder=$input_folder/${test_name}
 if [ ! -d $sph_folder ]; then mkdir $sph_folder; fi
  
 cd $wav_folder
-for i in *.wav ; do  sox $i -r 16k $sph_folder/${i%.wav}.sph ; done
+for i in *.wav ; do  sox $i -r 16k -b 16 $sph_folder/${i%.wav}.sph ; done
 cd $sph_folder
 for i in *.sph ; do  mv $i ${i%.sph}.WAV ; done
 
