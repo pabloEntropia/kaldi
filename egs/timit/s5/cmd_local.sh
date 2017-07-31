@@ -21,11 +21,9 @@
 
 
 # we use a local configuration
-export train_cmd="run.pl --mem 4G"
-export decode_cmd="run.pl --mem 4G"
-export mkgraph_cmd="run.pl --mem 8G"
+export train_cmd="run.pl --mem 26G"
+export decode_cmd="run.pl --mem 26G"
+export mkgraph_cmd="run.pl --mem 26G"
 # the use of cuda_cmd is deprecated but it's still sometimes used in nnet1
 # example scripts.
 export cuda_cmd="run.pl --gpu 1"
-
-
